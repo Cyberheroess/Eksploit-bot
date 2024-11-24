@@ -1,3 +1,5 @@
+![17324357411135682958563754975069](https://github.com/user-attachments/assets/0c78233a-35d1-4498-bc62-0e9c7bb20230)
+
 # Exploit Bot untuk AMP
 > Bot ini dirancang untuk membantu menguji berbagai jenis serangan terhadap situs web AMP🔥
 ## Fitur
