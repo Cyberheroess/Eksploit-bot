@@ -10,6 +10,8 @@ from selenium.webdriver.chrome.options import Options
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import asyncio
 
+# jangan lupa kasih bintang🗿
+
 logging.basicConfig(filename='exploit_log.txt', level=logging.INFO, format='%(asctime)s - %(message)s')
 
 def bot_response(message):
