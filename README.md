@@ -56,9 +56,4 @@
    pip install -r requirements.txt
    python main.py
    ```
-   ## pemberitauan
-   > pemberihauan kalau script ini terinspirasi dari script
-```bash
-https://github.com/AdjiDev/ailiscript
-```
-### > tetapi tidak mengandung unsur plagiat ataupun meniru
+
