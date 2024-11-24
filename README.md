@@ -1,12 +1,11 @@
 # Exploit Bot untuk AMP
-
-Bot ini dirancang untuk membantu menguji berbagai jenis serangan terhadap situs web AMP🔥
+> Bot ini dirancang untuk membantu menguji berbagai jenis serangan terhadap situs web AMP🔥
 ## Fitur
 
 <table>
   <tr>
     <th>Menu</th>
-    <th>Available</th>
+    <th>ready</th>
   </tr>
   <tr>
     <td>Denial of Service (DoS)</td>
@@ -42,6 +41,10 @@ Bot ini dirancang untuk membantu menguji berbagai jenis serangan terhadap situs 
   </tr>
 </table>
 
+## persyaratan 
+> python 3.10 (atau versi yabg terbaru)
+> chrome.exe
+
 ## Cara Penggunaan
 
 1. Clone repository ini:
@@ -49,6 +52,8 @@ Bot ini dirancang untuk membantu menguji berbagai jenis serangan terhadap situs 
    git clone https://github.com/Cyberheroess/Eksploit-bot.git
    cd Eksploit-bot
    pip install -r requirements.txt
+   python main.py
    ```
+   
 
    
