@@ -56,5 +56,7 @@
    pip install -r requirements.txt
    python main.py
    ```
+# peringatan❗
+> script ini bertujuan untuk mempelajari keamanan sistem website,bukan untuk tujuan yang melanggar hukum dan etis
 
 ![17324378607164781263377880425487](https://github.com/user-attachments/assets/e5d7478e-6541-4c6d-a7c3-89ed97a4c62c)
