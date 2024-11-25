@@ -184,13 +184,13 @@ def main():
 
     while True:
         print(f"{Y}Pilih jenis serangan:{N}")
-        print("1. Flooding (DDoS)")
-        print("2. Slowloris")
-        print("3. SQL Injection")
-        print("4. XSS ")
-        print("5. CSRF ")
-        print("6. CAPTCHA Bypass")
-        print("7. Brute Force Login")
+        print("{R}1{G}. Flooding (DDoS)")
+        print("{R}2{G}. Slowloris")
+        print("{R}3{G}. SQL Injection")
+        print("{R}4{G}. XSS ")
+        print("{R}5{G}. CSRF ")
+        print("{R}6{G}. CAPTCHA Bypass")
+        print("{R}7{G}. Brute Force Login")
         print("0. Keluar")
         
         choice = input("Pilih opsi: ")
