@@ -52,6 +52,10 @@
    pip install -r requirements.txt
    python main.py
    ```
+   jika ingin memungkinkan melewati keamanan web sepeeti WAF ,gunakan script ini
+   ```bash
+   python3 bypass.py
+   ```
 # peringatan❗
 > script ini bertujuan untuk mempelajari keamanan sistem website,bukan untuk tujuan yang melanggar hukum dan etis
 
