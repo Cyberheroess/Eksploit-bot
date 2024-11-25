@@ -18,10 +18,6 @@
     <td>✅</td>
   </tr>
   <tr>
-    <td>Cache Poisoning</td>
-    <td>✅</td>
-  </tr>
-  <tr>
     <td>SQL Injection</td>
     <td>✅</td>
   </tr>
