@@ -184,7 +184,7 @@ def main():
 
     while True:
         print(f"{Y}Pilih jenis serangan:{N}")
-        print(f"{R}}1{G}. Flooding (DDoS)")
+        print(f"{R}1{G}. Flooding (DDoS)")
         print(f"{R}2{G}. Slowloris")
         print(f"{R}3{G}. SQL Injection")
         print(f"{R}4{G}. XSS ")
