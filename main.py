@@ -148,7 +148,6 @@ def xss_attack(url, session):
             logging.info(f"Potensi celah XSS ditemukan dengan payload: {payload}")
 
 def csrf_attack(url, session):
-    # Mendapatkan token CSRF dari halaman
     response = send_request(url, session)
     if response and 'csrf_token' in response.text:
         csrf_token = response.text.split('csrf_token" value="')[1].split('"')[0]
@@ -165,7 +164,6 @@ def csrf_attack(url, session):
             logging.info(f"CSRF gagal pada {url}")
 
 def captcha_bypass(url, session):
-    # Melakukan bypass CAPTCHA dengan menggunakan layanan pihak ketiga atau teknik lainnya
     logging.info(f"Mencoba bypass CAPTCHA di {url}")
     response = send_request(url, session)
     if response and "captcha" in response.text.lower():
