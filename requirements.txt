@@ -1,8 +1,2 @@
 requests
 selenium
-asyncio
-threading
-logging
-random
-string
-concurrent.futures
