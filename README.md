@@ -26,11 +26,11 @@
     <td>✅</td>
   </tr>
   <tr>
-    <td>Pengujian Keamanan API</td>
+    <td>flooding</td>
     <td>✅</td>
   </tr>
   <tr>
-    <td>Bypass CAPTCHA dan Proteksi Bot</td>
+    <td>menggunakan proxy</td>
     <td>✅</td>
   </tr>
   <tr>
