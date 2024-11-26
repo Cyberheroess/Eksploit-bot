@@ -70,7 +70,14 @@ USER_AGENTS = load_file('user_agents.txt')
 PROXIES = load_file('proxies.txt')
 
 def get_random_proxy():
-    return random.choice(PROXIES) if PROXIES else None
+    """Mengambil proxy acak dari daftar."""
+    proxy = random.choice(PROXIES) if PROXIES else None
+    if proxy:
+        return {
+            'http': proxy,
+            'https': proxy
+        }
+    return None
 
 def get_random_user_agent():
     return random.choice(USER_AGENTS)
