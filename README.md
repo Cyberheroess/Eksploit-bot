@@ -10,10 +10,6 @@
     <th>ready</th>
   </tr>
   <tr>
-    <td>Denial of Service (DoS)</td>
-    <td>✅</td>
-  </tr>
-  <tr>
     <td>Distributed Denial of Service (DDoS)</td>
     <td>✅</td>
   </tr>
@@ -35,6 +31,10 @@
   </tr>
   <tr>
     <td>Keluar</td>
+    <td>✅</td>
+  </tr>
+  <tr>
+    <td>deface payload</td>
     <td>✅</td>
   </tr>
 </table>
