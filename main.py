@@ -142,7 +142,7 @@ def deface_payload(url, session):
         </head>
         <body>
             <h1>Website Anda Telah di hack!</h1>
-            <h1>canda hack<h1>
+            <h1>canda hack</h1>
             <p>
                 alasan utama kenapa web anda di hack.ada beberapa kemungkinan 
                 1) melanggar hukum agama
